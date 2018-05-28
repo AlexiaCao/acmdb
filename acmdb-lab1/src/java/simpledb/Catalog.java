@@ -18,12 +18,35 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Catalog {
 
-    /**
-     * Constructor.
-     * Creates a new, empty catalog.
-     */
+    private class DbTable {
+        private final DbFile file;
+        private final String name;
+        private final String pkeyField;
+
+        public DbTable(DbFile file, String name, String pkeyField) {
+            this.file = file;
+            this.name = name;
+            this.pkeyField = pkeyField;
+        }
+
+        public DbFile getFile() {
+            return file;
+        }
+        public String getName() {
+            return name;
+        }
+        public String getPkeyField() {
+            return pkeyField;
+        }
+    }
+
+    private final ConcurrentHashMap<Integer, DbTable> catalog;
+    private final ConcurrentHashMap<String, Integer> name2Id;
+
     public Catalog() {
         // some code goes here
+        catalog = new ConcurrentHashMap<>();
+        name2Id = new ConcurrentHashMap<>();
     }
 
     /**
@@ -37,6 +60,8 @@ public class Catalog {
      */
     public void addTable(DbFile file, String name, String pkeyField) {
         // some code goes here
+        catalog.put(file.getId(), new DbTable(file, name, pkeyField));
+        name2Id.put(name, file.getId());
     }
 
     public void addTable(DbFile file, String name) {
@@ -60,7 +85,13 @@ public class Catalog {
      */
     public int getTableId(String name) throws NoSuchElementException {
         // some code goes here
-        return 0;
+        if (name != null) {
+            Integer tid = name2Id.get(name);
+            if (tid != null) {
+                return tid;
+            }
+        }
+        throw new NoSuchElementException();
     }
 
     /**
@@ -71,7 +102,7 @@ public class Catalog {
      */
     public TupleDesc getTupleDesc(int tableid) throws NoSuchElementException {
         // some code goes here
-        return null;
+        return getDatabaseFile(tableid).getTupleDesc();
     }
 
     /**
@@ -82,27 +113,33 @@ public class Catalog {
      */
     public DbFile getDatabaseFile(int tableid) throws NoSuchElementException {
         // some code goes here
-        return null;
+        DbTable table = catalog.get(tableid);
+        if (table != null) {
+            return table.getFile();
+        }
+        throw new NoSuchElementException();
     }
 
     public String getPrimaryKey(int tableid) {
         // some code goes here
-        return null;
+        return catalog.get(tableid).getPkeyField();
     }
 
     public Iterator<Integer> tableIdIterator() {
         // some code goes here
-        return null;
+        return name2Id.values().iterator();
     }
 
     public String getTableName(int id) {
         // some code goes here
-        return null;
+        return catalog.get(id).getName();
     }
     
     /** Delete all tables from the catalog */
     public void clear() {
         // some code goes here
+        catalog.clear();
+        name2Id.clear();
     }
     
     /**
