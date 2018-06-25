@@ -244,20 +244,6 @@ public class HeapPage implements Page {
     public void deleteTuple(Tuple t) throws DbException {
         // some code goes here
         // not necessary for lab1
-        assert t != null;
-        RecordId recToDelete = t.getRecordId();
-        if (recToDelete != null && pid.equals(recToDelete.pageId)) {
-            for (int i = 0; i < numSlots; i++) {
-                if (isSlotUsed(i) && t.getRecordId().equals(tuples[i].getRecordId())) {
-                    markSlotUsed(i, false);
-                    // t.setRecordId(null);
-                    tuples[i] = null;
-                    return;
-                }
-            }
-            throw new DbException("deleteTuple: Error: tuple slot is empty");
-        }
-        throw new DbException("deleteTuple: Error: tuple is not on this page");
     }
 
     /**
@@ -270,35 +256,15 @@ public class HeapPage implements Page {
     public void insertTuple(Tuple t) throws DbException {
         // some code goes here
         // not necessary for lab1
-        assert t != null;
-        if (td.equals(t.getTupleDesc())) {
-            for (int i = 0; i < numSlots; i++) {
-                if (!isSlotUsed(i)) {
-                    // insert and update header
-                    markSlotUsed(i, true);
-                    t.setRecordId(new RecordId(pid, i));
-                    tuples[i] = t;
-                    return;
-                }
-            }
-            throw new DbException("insertTuple: ERROR: no tuple is inserted");
-        }
-        throw new DbException("insertTuple: no empty slots or tupledesc is mismatch");
     }
 
-    private TransactionId dirtier;
     /**
      * Marks this page as dirty/not dirty and record that transaction
      * that did the dirtying
      */
     public void markDirty(boolean dirty, TransactionId tid) {
         // some code goes here
-	    // not necessary for lab1
-        if (dirty) {
-            this.dirtier = tid;
-        } else {
-            this.dirtier = null;
-        }
+	// not necessary for lab1
     }
 
     /**
@@ -306,8 +272,8 @@ public class HeapPage implements Page {
      */
     public TransactionId isDirty() {
         // some code goes here
-	    // Not necessary for lab1
-        return dirtier;
+	// Not necessary for lab1
+        return null;      
     }
 
     /**
@@ -343,28 +309,17 @@ public class HeapPage implements Page {
     private void markSlotUsed(int i, boolean value) {
         // some code goes here
         // not necessary for lab1
-        if (i < numSlots) {
-            int hdNo = i / 8;
-            int offset = i % 8;
-
-            byte mask = (byte) (0x1 << offset);
-            if (value) {
-                header[hdNo] |= mask;
-            } else {
-                header[hdNo] &= ~mask;
-            }
-        }
     }
-    protected class HeapPageTupleIterator implements Iterator<Tuple> {
+    protected class HeapPageIterator implements Iterator {
         private final Iterator<Tuple> iter;
-        public HeapPageTupleIterator() {
-            ArrayList<Tuple> tupleArrayList = new ArrayList<Tuple>(numSlots);
-            for (int i = 0; i < numSlots; i++) {
+        public HeapPageIterator() {
+            ArrayList<Tuple> tuplesInUse = new ArrayList<Tuple>(tuples.length);
+            for (int i = 0; i < tuples.length; i++) {
                 if (isSlotUsed(i)) {
-                    tupleArrayList.add(i, tuples[i]);
+                    tuplesInUse.add(i, tuples[i]);
                 }
             }
-            iter = tupleArrayList.iterator();
+            iter = tuplesInUse.iterator();
         }
 
         @Override
@@ -378,7 +333,7 @@ public class HeapPage implements Page {
         }
 
         @Override
-        public Tuple next() {
+        public Object next() {
             return iter.next();
         }
     }
@@ -388,6 +343,6 @@ public class HeapPage implements Page {
      */
     public Iterator<Tuple> iterator() {
         // some code goes here
-        return new HeapPageTupleIterator();
+        return new HeapPageIterator();
     }
 }
