@@ -1,0 +1,40 @@
+-class BufferPool
+--flushPage()
+Flushes the page decided by evictPage() to disk to ensure dirty pages are updated on disk
+
+-BTreeFile
+--findLeafPage()
+find the appropriate leaf page given a particular key value
+recursively search through internal nodes until it reaches the leaf page corresponding to the provided key value
+if the provided value is null£¬recurse on the left-most child every time in order to find the left-most leaf page(useful for scanning the entire file)
+
+--splitLeafPage()
+split a leaf page to make room for new tuples and recursively split the parent node as needed to accommodate a new entry
+pay attention to the change of pointer
+1. split the leaf page by adding a new page on the right of the existing page and moving half of the tuples to the new page.  -2. copy the middle key up into the parent page, and recursively split the parent as needed to accommodate the new entry
+3. update the sibling pointers of all the affected leaf pages.  Return the page into which a tuple with the given key field should be inserted
+--splitInternalPage()
+split an internal page to make room for new entries and recursively split its parent page as needed to accommodate a new entry
+1. split the internal page by adding a new page on the right of the existing page and moving half of the entries to the new page
+2. push the middle key up into the parent page, and recursively split the parent as needed to accommodate the new entry
+3. update the parent pointers of all the children moving to the new page
+4. return the page into which an entry with the given key field should be inserted.
+
+--stealFromLeafPage()
+move some of the tuples from the sibling to the page so that the tuples are evenly distributed
+update the corresponding parent entry
+--stealFromLeftInternalPage(), stealFromRightInternalPage()
+move some of the entries from the left/right sibling to the page so that the entries are evenly distributed
+update the corresponding parent entry
+update the parent pointers of all children in the entries that were moved
+
+--mergeLeafPages()
+move all the tuples from the right page to the left page
+update the sibling pointers
+make the right page available for reuse
+delete the entry in the parent corresponding to the two pages
+--mergeInternalPages()
+move all the entries from the right page to the left page
+update the parent pointers of the children in the entries that were moved
+make the right page available for reuse
+delete the entry in the parent corresponding to the two pages

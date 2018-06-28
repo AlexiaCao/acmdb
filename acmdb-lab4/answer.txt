@@ -1,0 +1,25 @@
+-class IntHistogram
+a class used to record table statistics for selectivity estimation use the bucket-based method to calculate histograms
+--estimateSelectivity()
+estimate the selectivity of a particular predicate and operand on this table
+
+-class TableStats
+represents statistics about base tables in a query. 
+--estimateSelectivity(int field, Predicate.Op op, Field constant) Using statistics to estimate the selectivity of predicate (field, op, constant) on the table
+--estimateScanCost()
+estimate the cost of sequentially scanning the file, given that the cost to read a page is costPerPageIO
+--estimateTableCardinality(double selectivityFactor)
+return the number of tuples in the relation, given that a predicate with selectivity selectivityFactor is applied
+
+-class JoinOptimizer
+--estimateJoinCost()
+estimates the cost of join j
+known the left input is of cardinality card1, the right input of cardinality card2, the cost to scan the left input cost1, the cost to access the right input card2
+answer is card1 + cost1 + cost2 if j is a LogicalSubplanJoinNode and cost1 + card1 * cost2 + card1 * card2 else
+--estimateJoinCardinality()
+estimate the number of tuples output by join j
+known given that the left input is size card1, the right input is size card2, and the flags t1pkey and t2pkey that indicate whether the left and right (respectively) field is unique (a primary key)
+--orderJoins()
+a logical, reasonably efficient join on the specified tables
+operate on the joins class member and return a new Vector that specifies the order in which joins should be done
+
