@@ -1,0 +1,43 @@
+-class Filter
+an operator returning tuples that satisfy a Predicate that is specified as part of its constructor
+--class Predicate
+compare tuples to a specified Field value
+
+-class Join
+an operator joins tuples from its two children according to a JoinPredicate that is passed in as part of its constructor
+a simple nested loops join implementation and a hash join implementation
+--class JoinPredicate
+compares fields of two tuples using a predicate
+--class HashEquiJoin
+fetchNext() function of a hash join implementation
+
+-class Aggregate
+implement basic SQL aggregates with a GROUP BY clause
+implement five SQL aggregates (COUNT, SUM, AVG, MIN, MAX) and support grouping (over a single field)
+--class IntegerAggregator
+compute some aggregate over a set of IntFields.
+--class StringAggregator
+compute some aggregate over a set of StringFields.
+
+-class HeapPage, HeapFile
+--isSlotUsed()
+an abstraction to modify the filled or cleared status of a tuple in the page header
+--insertTuple()
+find a page with an empty slot
+if no such pages exist, create a new page and append it to the physical file on disk
+(uss the BufferPool.getPage() method)
+--deleteTuple()
+find the page a Tuple reside on by RecordID
+locate the page a tuple belongs to and modify the headers of the page appropriately
+(uss the BufferPool.getPage() methodh)
+-class BufferPool
+--insertTuple(), deleteTuple()
+add a tuple to the specified table on behalf of transaction tid
+acquire a write lock on the page the tuple is added to and any other pages that are updated
+mark any pages that were dirtied by the operation as dirty by calling their markDirty bit
+add versions of any pages that have been dirtied to the cache () to replace any existing versions of those pages
+
+-class Insert.java
+add the tuples read from its child operator to the tableid specified in its constructor (use the BufferPool.insertTuple() method)
+-class Delete.java
+deletes the tuples read from its child operator from the tableid specified in its constructor(use the BufferPool.deleteTuple() method)
